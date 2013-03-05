@@ -7,47 +7,44 @@
 //
 
 #import "AppDelegate.h"
-#import <IOKit/ps/IOPowerSources.h>
 
 
-static const NSString* DROPBOX_ID = @"com.getdropbox.dropbox";
-
-void onPowerSourceChanged(void *context) {    
-    
-    NSDictionary *chargerDetails = CFBridgingRelease(IOPSCopyExternalPowerAdapterDetails());
-    
-      
-    //NSLog(@"onPowerSourceChanged: %s", chargerDetails ? "charger" : "battery");
-    
-    if (chargerDetails) {
-        [[NSWorkspace sharedWorkspace] launchAppWithBundleIdentifier:(NSString*)DROPBOX_ID options:NSWorkspaceLaunchDefault | NSWorkspaceLaunchWithoutActivation additionalEventParamDescriptor:nil launchIdentifier:nil];
-    } else {
-        
-        NSArray *runningApps = [[NSWorkspace sharedWorkspace] runningApplications];
-        
-        for (NSRunningApplication* app in runningApps) {
-            if ([app.bundleIdentifier isEqual:DROPBOX_ID]) {
-                [app terminate];
-            }
-        }
-    }
-    
-    
-}
+static NSString* DROPBOX_ID = @"com.getdropbox.dropbox";
 
 
+@interface AppDelegate()
+@property (strong, nonatomic) PowerSourceStatus* powerStatus;
+@end
 
 @implementation AppDelegate
 
+- (void)connectedToCharger {
+    NSLog(@"connected");
+    
+    NSWorkspace* ws = [NSWorkspace sharedWorkspace];
+    
+    [ws launchAppWithBundleIdentifier:DROPBOX_ID
+                              options:NSWorkspaceLaunchDefault | NSWorkspaceLaunchWithoutActivation
+       additionalEventParamDescriptor:nil
+                     launchIdentifier:nil];
+    
+}
+- (void)disconnectedFromCharger {
+    NSLog(@"disconnected");
+    
+    NSArray* runningApps = [[NSWorkspace sharedWorkspace] runningApplications];
+    
+    for (NSRunningApplication* app in runningApps) {
+        if ([app.bundleIdentifier isEqual:DROPBOX_ID]) {
+            [app terminate];
+        }
+    }
+}
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    CFRunLoopSourceRef runLoopSrc = IOPSNotificationCreateRunLoopSource(onPowerSourceChanged, nil);
-    
-    CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSrc, kCFRunLoopDefaultMode);
-    
-    CFRelease(runLoopSrc);
-    
+    self.powerStatus = [PowerSourceStatus new];
+    self.powerStatus.delegate = self;
     
 }
 

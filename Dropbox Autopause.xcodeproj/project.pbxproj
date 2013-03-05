@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5D18C41D16E67D9300228A0E /* PowerSourceStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D18C41C16E67D9300228A0E /* PowerSourceStatus.m */; };
 		5D3762F0154EEF2700A5D323 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D3762EF154EEF2700A5D323 /* Cocoa.framework */; };
 		5D3762FA154EEF2700A5D323 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5D3762F8154EEF2700A5D323 /* InfoPlist.strings */; };
 		5D3762FC154EEF2700A5D323 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D3762FB154EEF2700A5D323 /* main.m */; };
@@ -17,6 +18,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5D18C41B16E67D9300228A0E /* PowerSourceStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PowerSourceStatus.h; sourceTree = "<group>"; };
+		5D18C41C16E67D9300228A0E /* PowerSourceStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PowerSourceStatus.m; sourceTree = "<group>"; };
 		5D3762EB154EEF2600A5D323 /* Dropbox Autopause.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Dropbox Autopause.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D3762EF154EEF2700A5D323 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		5D3762F2154EEF2700A5D323 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -86,6 +89,8 @@
 		5D3762F5154EEF2700A5D323 /* Dropbox Autopause */ = {
 			isa = PBXGroup;
 			children = (
+				5D18C41B16E67D9300228A0E /* PowerSourceStatus.h */,
+				5D18C41C16E67D9300228A0E /* PowerSourceStatus.m */,
 				5D376301154EEF2700A5D323 /* AppDelegate.h */,
 				5D376302154EEF2700A5D323 /* AppDelegate.m */,
 				5D376304154EEF2700A5D323 /* MainMenu.xib */,
@@ -171,6 +176,7 @@
 			files = (
 				5D3762FC154EEF2700A5D323 /* main.m in Sources */,
 				5D376303154EEF2700A5D323 /* AppDelegate.m in Sources */,
+				5D18C41D16E67D9300228A0E /* PowerSourceStatus.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
