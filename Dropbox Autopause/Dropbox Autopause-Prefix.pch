@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'Dropbox Autopause' target in the 'Dropbox Autopause' project
+//
+
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+#endif
