@@ -14,5 +14,6 @@
 @end
 
 @interface PowerSourceStatus : NSObject
+- (void)poll;
 @property (weak, nonatomic) id<PowerSourceStatusDelegate> delegate;
 @end

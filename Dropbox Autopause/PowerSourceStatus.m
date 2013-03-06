@@ -48,6 +48,9 @@ bool _previouslyConnectedValid;
         
     return self;
 }
+- (void)poll {
+    onPowerSourceChanged((__bridge void*)self);
+}
 - (void)chargerStatusNotification:(BOOL)connected {
     if (!_previouslyConnectedValid || _previouslyConnected != connected) {
         [self sendToDelegate:connected];

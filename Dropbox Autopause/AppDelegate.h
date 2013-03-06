@@ -8,7 +8,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import "PowerSourceStatus.h"
+#import "AppPrefs.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, PowerSourceStatusDelegate>
-
+@interface AppDelegate : NSObject
+    <NSApplicationDelegate, PowerSourceStatusDelegate, AppPrefsDelegate>
 @end
