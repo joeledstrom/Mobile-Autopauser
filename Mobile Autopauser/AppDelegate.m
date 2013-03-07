@@ -88,6 +88,7 @@ static void pauseProcess(NSString *bundleId) {
         self.windowController = [[PrefsWindowController alloc] initWithWindowNibName:@"Prefs"];
 
     [self.windowController showWindow:self];
+    [NSApp activateIgnoringOtherApps:YES];
 }
 
 - (void)buildStatusMenu {

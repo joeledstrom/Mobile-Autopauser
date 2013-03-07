@@ -49,13 +49,6 @@ NSMutableDictionary* _iconCache;
     _iconCache = nil;
 }
 
-
-#pragma mark - AppPrefsDelegate
-- (void)appPrefsChangedTo:(NSArray*)prefs {
-    _cachedAppPrefs = prefs;
-    [self.tableView reloadData];
-}
-
 - (NSImage*)getIconForBundleId:(NSString*)bundleId {
     if (!_iconCache)
         _iconCache = [NSMutableDictionary new];
@@ -72,9 +65,26 @@ NSMutableDictionary* _iconCache;
     
     if (icon)
         _iconCache[bundleId] = icon;
-
+    
     return icon;
 }
+
+- (void)clickHandler:(NSControl*)sender {
+    NSSegmentedControl* segControl = (NSSegmentedControl*)sender;
+    NSString* bundleId = [_cachedAppPrefs[sender.tag] bundleId];
+    
+    AppPref* pref = _prefs[bundleId];
+    pref.mode = segControl.selectedSegment;
+    _prefs[bundleId] = pref;
+}
+
+#pragma mark - AppPrefsDelegate
+- (void)appPrefsChangedTo:(NSArray*)prefs {
+    _cachedAppPrefs = prefs;
+    [self.tableView reloadData];
+}
+
+
 
 #pragma mark - NSTableViewDelegate and NSTableViewDataSource
 
@@ -95,15 +105,6 @@ NSMutableDictionary* _iconCache;
     [v.segmentedControl setAction:@selector(clickHandler:)];
     [v.segmentedControl setTag:row];
     return v;
-}
-
-- (void)clickHandler:(NSControl*)sender {
-    NSSegmentedControl* segControl = (NSSegmentedControl*)sender;
-    NSString* bundleId = [_cachedAppPrefs[sender.tag] bundleId];
-    
-    AppPref* pref = _prefs[bundleId];
-    pref.mode = segControl.selectedSegment;
-    _prefs[bundleId] = pref;
 }
 
 
