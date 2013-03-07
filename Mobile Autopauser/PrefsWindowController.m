@@ -14,6 +14,7 @@
 
 AppPrefs* _prefs;
 NSArray* _cachedAppPrefs;
+NSMutableDictionary* _iconCache;
 
 
 - (void)populatePrefsWithApps {
@@ -22,9 +23,11 @@ NSArray* _cachedAppPrefs;
         if (app.bundleIdentifier != nil &&
             ![app.bundleIdentifier isEqual:[NSRunningApplication currentApplication].bundleIdentifier]) {
             
-            AppPref* pref = [AppPref new];
-            pref.bundleId = app.bundleIdentifier;
-            _prefs[app.bundleIdentifier] = pref;
+            if (!_prefs[app.bundleIdentifier]) {
+                AppPref* pref = [AppPref new];
+                pref.bundleId = app.bundleIdentifier;
+                _prefs[app.bundleIdentifier] = pref;
+            }
         }
     }
 }
@@ -42,6 +45,10 @@ NSArray* _cachedAppPrefs;
     [self.tableView reloadData];
 }
 
+- (void)windowWillClose:(NSNotification *)notification {
+    _iconCache = nil;
+}
+
 
 #pragma mark - AppPrefsDelegate
 - (void)appPrefsChangedTo:(NSArray*)prefs {
@@ -50,12 +57,23 @@ NSArray* _cachedAppPrefs;
 }
 
 - (NSImage*)getIconForBundleId:(NSString*)bundleId {
+    if (!_iconCache)
+        _iconCache = [NSMutableDictionary new];
+    
+    if (_iconCache[bundleId])
+        return _iconCache[bundleId];
+    
     NSWorkspace* ws = [NSWorkspace sharedWorkspace];
     NSURL* url = [ws URLForApplicationWithBundleIdentifier:bundleId];
     
     if (url.path == nil) return nil;
     
-    return [ws iconForFile:url.path];
+    NSImage* icon = [ws iconForFile:url.path];
+    
+    if (icon)
+        _iconCache[bundleId] = icon;
+
+    return icon;
 }
 
 #pragma mark - NSTableViewDelegate and NSTableViewDataSource
