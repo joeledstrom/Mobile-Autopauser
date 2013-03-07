@@ -13,7 +13,6 @@
 		5D18C44816E806D900228A0E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5D18C43516E806D900228A0E /* InfoPlist.strings */; };
 		5D18C44916E806D900228A0E /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5D18C43716E806D900228A0E /* MainMenu.xib */; };
 		5D18C44A16E806D900228A0E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D18C43916E806D900228A0E /* main.m */; };
-		5D18C44B16E806D900228A0E /* Mobile Autopauser-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5D18C43A16E806D900228A0E /* Mobile Autopauser-Info.plist */; };
 		5D18C44C16E806D900228A0E /* PowerSourceStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D18C43D16E806D900228A0E /* PowerSourceStatus.m */; };
 		5D18C44D16E806D900228A0E /* Prefs.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5D18C43E16E806D900228A0E /* Prefs.xib */; };
 		5D18C44E16E806D900228A0E /* PrefsCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D18C44016E806D900228A0E /* PrefsCellView.m */; };
@@ -72,10 +71,10 @@
 				5D18C43016E806D900228A0E /* AppDelegate.m */,
 				5D18C43116E806D900228A0E /* AppPrefs.h */,
 				5D18C43216E806D900228A0E /* AppPrefs.m */,
-				5D18C43C16E806D900228A0E /* PowerSourceStatus.h */,
-				5D18C43D16E806D900228A0E /* PowerSourceStatus.m */,
 				5D18C43F16E806D900228A0E /* PrefsCellView.h */,
 				5D18C44016E806D900228A0E /* PrefsCellView.m */,
+				5D18C43C16E806D900228A0E /* PowerSourceStatus.h */,
+				5D18C43D16E806D900228A0E /* PowerSourceStatus.m */,
 				5D18C44116E806D900228A0E /* PrefsWindowController.h */,
 				5D18C44216E806D900228A0E /* PrefsWindowController.m */,
 				5D18C45216E806F500228A0E /* Supporting Files */,
@@ -189,7 +188,6 @@
 				5D18C44716E806D900228A0E /* Credits.rtf in Resources */,
 				5D18C44816E806D900228A0E /* InfoPlist.strings in Resources */,
 				5D18C44916E806D900228A0E /* MainMenu.xib in Resources */,
-				5D18C44B16E806D900228A0E /* Mobile Autopauser-Info.plist in Resources */,
 				5D18C44D16E806D900228A0E /* Prefs.xib in Resources */,
 				5D18C45016E806D900228A0E /* ugly.png in Resources */,
 				5D18C45116E806D900228A0E /* ugly.pxm in Resources */,
@@ -302,8 +300,8 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "Dropbox Autopause/Mobile Autopauser-Prefix.pch";
-				INFOPLIST_FILE = "Dropbox Autopause/Mobile Autopauser-Info.plist";
+				GCC_PREFIX_HEADER = "Mobile Autopauser/Mobile Autopauser-Prefix.pch";
+				INFOPLIST_FILE = "Mobile Autopauser/Mobile Autopauser-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				PRODUCT_NAME = "Mobile Autopauser";
 				WRAPPER_EXTENSION = app;
@@ -315,8 +313,8 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "Dropbox Autopause/Mobile Autopauser-Prefix.pch";
-				INFOPLIST_FILE = "Dropbox Autopause/Mobile Autopauser-Info.plist";
+				GCC_PREFIX_HEADER = "Mobile Autopauser/Mobile Autopauser-Prefix.pch";
+				INFOPLIST_FILE = "Mobile Autopauser/Mobile Autopauser-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				PRODUCT_NAME = "Mobile Autopauser";
 				WRAPPER_EXTENSION = app;

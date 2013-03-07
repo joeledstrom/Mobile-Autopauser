@@ -8,12 +8,17 @@
 
 #import <Foundation/Foundation.h>
 
+
+typedef enum {
+    POWER_STATUS_CONNECTED,
+    POWER_STATUS_DISCONNECTED
+} PowerStatus;
+
 @protocol PowerSourceStatusDelegate <NSObject>
-- (void)connectedToCharger;
-- (void)disconnectedFromCharger;
+- (void)powerStatusChanged;
 @end
 
 @interface PowerSourceStatus : NSObject
-- (void)poll;
+@property PowerStatus powerStatus;
 @property (weak, nonatomic) id<PowerSourceStatusDelegate> delegate;
 @end

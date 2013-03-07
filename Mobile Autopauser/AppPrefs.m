@@ -8,15 +8,32 @@
 
 #import "AppPrefs.h"
 
-typedef NSDictionary* (^prefChangeFunc)(NSMutableDictionary* pref);
+@implementation AppPref
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        self.mode = APP_MODE_NO_ACTION;
+        self.tempPaused = NO;
+    }
+    return self;
+}
+- (AppPref*)toggleTemporaryPause {
+    self.tempPaused = self.tempPaused ? NO : YES;
+    return self;
+}
+@end
 
+typedef BOOL (^usePrefsFunc)(NSMutableDictionary* appPrefs);
 
 
 @implementation AppPrefs
 
-NSString* const APP_MODE = @"mode";
-NSString* const APP_TEMP_PAUSE = @"tempPause";
-NSString* const KEY = @"appPrefs";
+static NSString* const APP_MODE = @"mode";
+static NSString* const APP_TEMP_PAUSE = @"tempPause";
+static NSString* const PREF_KEY = @"appPrefs";
+
+
 
 - (id)init
 {
@@ -29,76 +46,60 @@ NSString* const KEY = @"appPrefs";
     return self;
 }
 
-- (void)removeBundleId:(NSString*)bundleId {
-    [self change:bundleId to:^(NSMutableDictionary* pref) {
-        return (NSDictionary*)nil;
-    }];
-}
-- (void)switchToTerminateForBundleId:(NSString*)bundleId {
-    [self change:bundleId to:^(NSMutableDictionary* pref) {
-        pref[APP_MODE] = @(APP_MODE_TERMINATE);
-        return pref;
-    }];
-}
-- (void)switchToPauseForBundleId:(NSString*)bundleId {
-    [self change:bundleId to:^(NSMutableDictionary* pref) {
-        pref[APP_MODE] = @(APP_MODE_PAUSE);
-        return pref;
-    }];
-}
-- (void)toggleTemporaryPauseForBundleId:(NSString*)bundleId {
-    [self change:bundleId to:^(NSMutableDictionary* pref) {
-        NSNumber* last = pref[APP_TEMP_PAUSE];
-        pref[APP_TEMP_PAUSE] = @(last.boolValue == YES ? NO : YES);
-        
-        return pref;
-    }];
-}
-- (NSDictionary*)getAllAppPrefs {
-    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
-    return [userDefaults objectForKey:KEY];
-}
-// appPrefs = {bundleId: {terminateMode: 0, tempPause = TRUE}} 
 
-- (void)change:(NSString*)bundleId to:(prefChangeFunc)func {
-    
-    
+- (void)usePrefsWith:(usePrefsFunc)func {
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
-    NSDictionary* appPrefs = [userDefaults objectForKey:KEY];
+    NSMutableDictionary* appPrefs = [[userDefaults objectForKey:PREF_KEY] mutableCopy];
     
     if (!appPrefs)
-        appPrefs = @{};
+        appPrefs = [NSMutableDictionary new];
     
-    
-    NSDictionary* pref = ((NSDictionary*)appPrefs[bundleId]);
-    
-    if (!pref)
-        pref = @{APP_MODE: @(APP_MODE_TERMINATE), APP_TEMP_PAUSE: @(NO)};
-    
-    
-    NSMutableDictionary* mutablePref = [NSMutableDictionary dictionaryWithDictionary:pref];
-    NSDictionary* changedPref = func(mutablePref);
-    NSMutableDictionary* changedAppPrefs =
-    [NSMutableDictionary dictionaryWithDictionary:appPrefs];
-    
-    if (changedPref)
-        changedAppPrefs[bundleId] = changedPref;
-    else
-        [changedAppPrefs removeObjectForKey:bundleId];
-    
-    
-    if (![changedAppPrefs isEqualToDictionary:appPrefs]) {
-        [userDefaults setObject:changedAppPrefs forKey:KEY];
+    BOOL changed = func(appPrefs);
         
-        //[userDefaults synchronize];  // TODO: research: necessary?
-                
-        [self sendToDelegate:[NSDictionary dictionaryWithDictionary:changedAppPrefs]];
-        
-    }
-    
+    if (changed)
+       [userDefaults setObject:appPrefs forKey:PREF_KEY];
 }
 
-- (void)sendToDelegate:(NSDictionary*)prefs {
+- (void)setObject:(AppPref*)pref forKeyedSubscript:(NSString*)bundleId {
+    
+
+    [self usePrefsWith:^(NSMutableDictionary* appPrefs) {
+        assert([pref.bundleId isEqual:bundleId]);
+        appPrefs[bundleId] = @{APP_MODE: @(pref.mode), APP_TEMP_PAUSE: @(pref.tempPaused)};
+        return YES;
+    }];
+}
+
+- (AppPref*)objectForKeyedSubscript:(NSString*)bundleId {
+    AppPref* pref = [AppPref new];
+    [self usePrefsWith:^(NSMutableDictionary* appPrefs) {
+        NSDictionary* d = appPrefs[bundleId];
+        
+        pref.mode = [d[APP_MODE] integerValue];
+        pref.tempPaused = [d[APP_TEMP_PAUSE] boolValue];
+        pref.bundleId = bundleId;
+
+        return NO;
+    }];
+   
+    return pref;
+}
+
+
+- (NSArray*)getAllAppPrefs {
+    NSMutableArray* prefs = [NSMutableArray new];
+    [self usePrefsWith:^BOOL(NSMutableDictionary* appPrefs) {
+        
+        for (NSString* bundleId in appPrefs)
+            [prefs addObject:self[bundleId]];
+        
+        return NO;
+    }];
+             
+    return [prefs copy];
+}
+
+- (void)sendToDelegate:(NSArray*)prefs {
     if ([self.delegate conformsToProtocol:@protocol(AppPrefsDelegate)])
         [self.delegate appPrefsChangedTo:prefs];
         

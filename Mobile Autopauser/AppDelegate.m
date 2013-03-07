@@ -24,6 +24,24 @@ static NSMenuItem* makeMenuItem(NSString* title, SEL sel, id target) {
     return item;
 }
 
+
+static void startAndUnpauseProcess(NSString* bundleId) {
+    NSWorkspace* ws = [NSWorkspace sharedWorkspace];
+    
+    [ws launchAppWithBundleIdentifier:bundleId
+                              options:NSWorkspaceLaunchDefault| NSWorkspaceLaunchWithoutActivation
+       additionalEventParamDescriptor:nil
+                     launchIdentifier:nil];
+    
+    
+    NSArray* runningApps = [NSRunningApplication runningApplicationsWithBundleIdentifier:bundleId];
+    for (NSRunningApplication* app in runningApps) {
+        
+        NSString* cmd = [NSString stringWithFormat:@"/bin/kill -CONT %d", app.processIdentifier];
+        system(cmd.UTF8String);
+    }
+}
+
 static void terminateProcess(NSString *bundleId) {
     NSArray* runningApps = [NSRunningApplication runningApplicationsWithBundleIdentifier:bundleId];
     for (NSRunningApplication* app in runningApps)
@@ -39,14 +57,7 @@ static void pauseProcess(NSString *bundleId) {
     }
 }
 
-static void unpauseProcess(NSString *bundleId) {
-    NSArray* runningApps = [NSRunningApplication runningApplicationsWithBundleIdentifier:bundleId];
-    for (NSRunningApplication* app in runningApps) {
-        
-        NSString* cmd = [NSString stringWithFormat:@"/bin/kill -CONT %d", app.processIdentifier];
-        system(cmd.UTF8String);
-    }
-}
+
 
 @implementation AppDelegate
 
@@ -68,6 +79,7 @@ static void unpauseProcess(NSString *bundleId) {
     self.statusItem.highlightMode = YES;
     
     [self buildStatusMenu];
+    [self powerStatusChanged];
     
 }
 
@@ -80,24 +92,18 @@ static void unpauseProcess(NSString *bundleId) {
 
 - (void)buildStatusMenu {
     NSMenu* menu = [[NSMenu alloc] initWithTitle:@""];
-    NSDictionary* appPrefs = [self.prefs getAllAppPrefs];
+    NSArray* appPrefs = [self.prefs getAllAppPrefs];
     
-    for (NSString* bundleId in appPrefs.keyEnumerator) {
+    for (AppPref* app in appPrefs) {
         
-        NSNumber* m = appPrefs[bundleId][APP_MODE];
-        NSString* mode = m == nil || m.integerValue == APP_MODE_TERMINATE
-                       ? @"TERMINATE"
-                       : @"PAUSE";
-        
-        NSString* title =
-            [NSString stringWithFormat:@"%@ [%@]", bundleId, mode];
-        
-        NSMenuItem* i = makeMenuItem(title, @selector(appInMenuClicked:), self);
-        
-        NSNumber* tempPause = appPrefs[bundleId][APP_TEMP_PAUSE];
-        i.state = tempPause == nil || tempPause.boolValue == NO ? 1 : 0;
-        
-        [menu addItem: i];
+        if (app.mode != APP_MODE_NO_ACTION) {
+            NSString* m = app.mode == APP_MODE_TERMINATE ? @"TERMINATE" : @"PAUSE";
+            NSString* title = [NSString stringWithFormat:@"%@ [%@]", app.bundleId, m];
+            NSMenuItem* i = makeMenuItem(title, @selector(appInMenuClicked:), self);
+            i.state = !app.tempPaused;
+            
+            [menu addItem: i];
+        }
     }
     
     [menu addItem:[NSMenuItem separatorItem]];
@@ -110,52 +116,36 @@ static void unpauseProcess(NSString *bundleId) {
 - (void)appInMenuClicked:(id)sender {
     NSString* bundleId = [[sender title] componentsSeparatedByString:@" "][0];
     
-    [self.prefs toggleTemporaryPauseForBundleId:bundleId];
+    self.prefs[bundleId] = [self.prefs[bundleId] toggleTemporaryPause];
     
-    // bit of a hack
-    [self connectedToCharger];
-    [self disconnectedFromCharger];
-    [self.powerStatus poll];
+    [self powerStatusChanged];
 }
 
 #pragma mark - PowerSourceStatusDelegate
 
-- (void)connectedToCharger {
+- (void)powerStatusChanged {
     
-    NSWorkspace* ws = [NSWorkspace sharedWorkspace];
-    
-    NSDictionary* appPrefs = [self.prefs getAllAppPrefs];
-    
-    for (NSString* bundleId in appPrefs.keyEnumerator) {
-                                        
-        [ws launchAppWithBundleIdentifier:bundleId
-                                  options:NSWorkspaceLaunchDefault| NSWorkspaceLaunchWithoutActivation
-           additionalEventParamDescriptor:nil
-                         launchIdentifier:nil];
+    NSArray* appPrefs = [self.prefs getAllAppPrefs];
+    PowerStatus ps = self.powerStatus.powerStatus;
         
-        unpauseProcess(bundleId);
+    for (AppPref* app in appPrefs) {
+        
+        if (ps == POWER_STATUS_CONNECTED && app.mode != APP_MODE_NO_ACTION)
+            startAndUnpauseProcess(app.bundleId);
+        
+        
+        if (ps == POWER_STATUS_DISCONNECTED) {
+            
+            if (app.mode != APP_MODE_NO_ACTION && app.tempPaused)
+                startAndUnpauseProcess(app.bundleId);
+           
+            if (app.mode == APP_MODE_TERMINATE && !app.tempPaused)
+                terminateProcess(app.bundleId);
+            
+            if (app.mode == APP_MODE_PAUSE && !app.tempPaused)
+                pauseProcess(app.bundleId);
+        }
     }
-    
-    
-}
-- (void)disconnectedFromCharger {
-    
-    NSDictionary* appPrefs = [self.prefs getAllAppPrefs];
-    
-    
-    for (NSString* bundleId in appPrefs.keyEnumerator) {
-        NSNumber* m = appPrefs[bundleId][APP_MODE];
-        BOOL term = m == nil || m.integerValue == APP_MODE_TERMINATE ? YES : NO;
-        NSNumber* t = appPrefs[bundleId][APP_TEMP_PAUSE];
-        BOOL tempPause = t == nil || t.boolValue == NO ? 0 : 1;
-        
-        if (term && !tempPause)
-            terminateProcess(bundleId);
-        else if (!term && !tempPause)
-            pauseProcess(bundleId);
-        
-    }
-    
 }
 
 #pragma mark - AppPrefsDelegate

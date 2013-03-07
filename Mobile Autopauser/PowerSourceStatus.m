@@ -11,7 +11,7 @@
 
 
 @interface PowerSourceStatus()
-- (void)chargerStatusNotification:(BOOL)connected;
+- (void)chargerStatusNotification:(PowerStatus)connected;
 @end
 
 void onPowerSourceChanged(void* context) {
@@ -21,9 +21,9 @@ void onPowerSourceChanged(void* context) {
     NSDictionary* chargerDetails = CFBridgingRelease(IOPSCopyExternalPowerAdapterDetails());
     
     if (chargerDetails) {
-        [self chargerStatusNotification:YES];
+        [self chargerStatusNotification:POWER_STATUS_CONNECTED];
     } else {
-        [self chargerStatusNotification:NO];
+        [self chargerStatusNotification:POWER_STATUS_DISCONNECTED];
     }
 }
 
@@ -31,8 +31,6 @@ void onPowerSourceChanged(void* context) {
 @implementation PowerSourceStatus
 
 CFRunLoopSourceRef _runLoopSrc;
-bool _previouslyConnected;
-bool _previouslyConnectedValid;
 
 - (id)init {
     self = [super init];
@@ -40,32 +38,25 @@ bool _previouslyConnectedValid;
         _runLoopSrc = IOPSNotificationCreateRunLoopSource(onPowerSourceChanged, (__bridge void*)self);
         CFRunLoopAddSource(CFRunLoopGetMain(), _runLoopSrc, kCFRunLoopDefaultMode);
         
-        // after the current runloop iteration, send initial state to delegate
-        dispatch_async(dispatch_get_main_queue(), ^{
-            onPowerSourceChanged((__bridge void*)self);
-        });
+        onPowerSourceChanged((__bridge void*)self);
     }
         
     return self;
 }
-- (void)poll {
-    onPowerSourceChanged((__bridge void*)self);
-}
-- (void)chargerStatusNotification:(BOOL)connected {
-    if (!_previouslyConnectedValid || _previouslyConnected != connected) {
-        [self sendToDelegate:connected];
-    }
+
+- (void)chargerStatusNotification:(PowerStatus)newStatus {
+    PowerStatus oldStatus = self.powerStatus;
     
-    _previouslyConnected = connected;
-    _previouslyConnectedValid = YES;
+    self.powerStatus = newStatus;
+    
+    if (oldStatus != newStatus) {
+        [self notifyDelegate];
+    }
 }
 
-- (void)sendToDelegate:(BOOL)connected {
-    if (connected && [self.delegate conformsToProtocol:@protocol(PowerSourceStatusDelegate)])
-        [self.delegate connectedToCharger];
-    else
-        [self.delegate disconnectedFromCharger];
-    
+- (void)notifyDelegate {
+    if ([self.delegate conformsToProtocol:@protocol(PowerSourceStatusDelegate)])
+        [self.delegate powerStatusChanged];
 }
 
 - (void)dealloc {

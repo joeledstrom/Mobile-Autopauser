@@ -10,70 +10,69 @@
 #import "PrefsCellView.h"
 
 
-@interface PrefsWindowController ()
-
-@end
-
 @implementation PrefsWindowController
 
-NSArray* _runningApps;
 AppPrefs* _prefs;
-NSDictionary* _cachedAppPrefs;
+NSArray* _cachedAppPrefs;
 
+
+- (void)populatePrefsWithApps {
+    NSArray* apps = [[NSWorkspace sharedWorkspace] runningApplications];
+    for (NSRunningApplication* app in apps) {
+        if (app.bundleIdentifier != nil &&
+            ![app.bundleIdentifier isEqual:[NSRunningApplication currentApplication].bundleIdentifier]) {
+            
+            AppPref* pref = [AppPref new];
+            pref.bundleId = app.bundleIdentifier;
+            _prefs[app.bundleIdentifier] = pref;
+        }
+    }
+}
 
 - (void)windowDidLoad
 {
     [super windowDidLoad];
     [self.window makeKeyAndOrderFront:nil];
     
-    NSArray* apps = [[NSWorkspace sharedWorkspace] runningApplications];
-    NSMutableArray* filteredApps = [NSMutableArray array];
-    for (NSRunningApplication* app in apps) {
-        if (app.bundleIdentifier != nil &&
-            ![app.bundleIdentifier isEqualTo:[NSRunningApplication currentApplication].bundleIdentifier]) {
-            
-            [filteredApps addObject:app];
-        }
-    }
-    
-    
-    _runningApps = [NSArray arrayWithArray:filteredApps];
     _prefs = [AppPrefs new];
     _prefs.delegate = self;
+    
+    [self populatePrefsWithApps];
     _cachedAppPrefs = [_prefs getAllAppPrefs];
     [self.tableView reloadData];
 }
 
 
 #pragma mark - AppPrefsDelegate
-- (void)appPrefsChangedTo:(NSDictionary*)prefs {
+- (void)appPrefsChangedTo:(NSArray*)prefs {
     _cachedAppPrefs = prefs;
     [self.tableView reloadData];
 }
 
-
+- (NSImage*)getIconForBundleId:(NSString*)bundleId {
+    NSWorkspace* ws = [NSWorkspace sharedWorkspace];
+    NSURL* url = [ws URLForApplicationWithBundleIdentifier:bundleId];
+    
+    if (url.path == nil) return nil;
+    
+    return [ws iconForFile:url.path];
+}
 
 #pragma mark - NSTableViewDelegate and NSTableViewDataSource
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView {
-    return [_runningApps count];
+    return [_cachedAppPrefs count];
 }
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
+    
     PrefsCellView* v = [tableView makeViewWithIdentifier:@"appCell" owner:self];
-    NSRunningApplication* app = _runningApps[row];
-    v.imageView.image = app.icon;
-    v.textField.stringValue = app.localizedName;
+    AppPref* app = _cachedAppPrefs[row];
     
-    NSDictionary* pref = _cachedAppPrefs[app.bundleIdentifier];
-    
-    if (!pref)
-        v.segmentedControl.selectedSegment = 0;
-    else if ([pref[APP_MODE] isEqualTo:@(APP_MODE_TERMINATE)])
-        v.segmentedControl.selectedSegment = 1;
-    else
-        v.segmentedControl.selectedSegment = 2;
-    
+    v.imageView.image = [self getIconForBundleId:app.bundleId];
+    v.textField.stringValue = app.bundleId;
+    v.segmentedControl.selectedSegment = app.mode;
+       
     [v.segmentedControl setTarget:self];
     [v.segmentedControl setAction:@selector(clickHandler:)];
     [v.segmentedControl setTag:row];
@@ -82,19 +81,11 @@ NSDictionary* _cachedAppPrefs;
 
 - (void)clickHandler:(NSControl*)sender {
     NSSegmentedControl* segControl = (NSSegmentedControl*)sender;
-    NSRunningApplication* app = _runningApps[sender.tag];
+    NSString* bundleId = [_cachedAppPrefs[sender.tag] bundleId];
     
-    switch (segControl.selectedSegment) {
-        case 0:
-            [_prefs removeBundleId:app.bundleIdentifier];
-            break;
-        case 1:
-            [_prefs switchToTerminateForBundleId:app.bundleIdentifier];
-            break;
-        case 2:
-            [_prefs switchToPauseForBundleId:app.bundleIdentifier];
-            break;
-    }
+    AppPref* pref = _prefs[bundleId];
+    pref.mode = segControl.selectedSegment;
+    _prefs[bundleId] = pref;
 }
 
 
