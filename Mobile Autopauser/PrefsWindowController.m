@@ -10,11 +10,11 @@
 #import "PrefsCellView.h"
 
 
-@implementation PrefsWindowController
-
-AppPrefs* _prefs;
-NSArray* _cachedAppPrefs;
-NSMutableDictionary* _iconCache;
+@implementation PrefsWindowController {
+    AppPrefs* _prefs;
+    NSArray* _cachedAppPrefs;
+    NSMutableDictionary* _iconCache;
+}
 
 
 - (void)populatePrefsWithApps {

@@ -28,9 +28,9 @@ void onPowerSourceChanged(void* context) {
 }
 
 
-@implementation PowerSourceStatus
-
-CFRunLoopSourceRef _runLoopSrc;
+@implementation PowerSourceStatus {
+    CFRunLoopSourceRef _runLoopSrc;
+}
 
 - (id)init {
     self = [super init];

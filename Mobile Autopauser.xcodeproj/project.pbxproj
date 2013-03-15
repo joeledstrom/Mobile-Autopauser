@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5D0FAA2416F0131800D70CDE /* ProcessUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D0FAA2316F0131800D70CDE /* ProcessUtils.m */; };
+		5D0FAA2716F014EF00D70CDE /* ActivationUnpauser.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D0FAA2616F014EF00D70CDE /* ActivationUnpauser.m */; };
 		5D18C44516E806D900228A0E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D18C43016E806D900228A0E /* AppDelegate.m */; };
 		5D18C44616E806D900228A0E /* AppPrefs.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D18C43216E806D900228A0E /* AppPrefs.m */; };
 		5D18C44716E806D900228A0E /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 5D18C43316E806D900228A0E /* Credits.rtf */; };
@@ -24,6 +26,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5D0FAA2216F0131800D70CDE /* ProcessUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProcessUtils.h; sourceTree = "<group>"; };
+		5D0FAA2316F0131800D70CDE /* ProcessUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProcessUtils.m; sourceTree = "<group>"; };
+		5D0FAA2516F014EF00D70CDE /* ActivationUnpauser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivationUnpauser.h; sourceTree = "<group>"; };
+		5D0FAA2616F014EF00D70CDE /* ActivationUnpauser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivationUnpauser.m; sourceTree = "<group>"; };
 		5D18C42F16E806D900228A0E /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		5D18C43016E806D900228A0E /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		5D18C43116E806D900228A0E /* AppPrefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppPrefs.h; sourceTree = "<group>"; };
@@ -67,6 +73,8 @@
 		5D18C42E16E806D900228A0E /* Mobile Autopauser */ = {
 			isa = PBXGroup;
 			children = (
+				5D0FAA2516F014EF00D70CDE /* ActivationUnpauser.h */,
+				5D0FAA2616F014EF00D70CDE /* ActivationUnpauser.m */,
 				5D18C42F16E806D900228A0E /* AppDelegate.h */,
 				5D18C43016E806D900228A0E /* AppDelegate.m */,
 				5D18C43116E806D900228A0E /* AppPrefs.h */,
@@ -77,6 +85,8 @@
 				5D18C43D16E806D900228A0E /* PowerSourceStatus.m */,
 				5D18C44116E806D900228A0E /* PrefsWindowController.h */,
 				5D18C44216E806D900228A0E /* PrefsWindowController.m */,
+				5D0FAA2216F0131800D70CDE /* ProcessUtils.h */,
+				5D0FAA2316F0131800D70CDE /* ProcessUtils.m */,
 				5D18C45216E806F500228A0E /* Supporting Files */,
 			);
 			path = "Mobile Autopauser";
@@ -207,6 +217,8 @@
 				5D18C44C16E806D900228A0E /* PowerSourceStatus.m in Sources */,
 				5D18C44E16E806D900228A0E /* PrefsCellView.m in Sources */,
 				5D18C44F16E806D900228A0E /* PrefsWindowController.m in Sources */,
+				5D0FAA2416F0131800D70CDE /* ProcessUtils.m in Sources */,
+				5D0FAA2716F014EF00D70CDE /* ActivationUnpauser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

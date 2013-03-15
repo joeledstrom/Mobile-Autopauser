@@ -8,6 +8,8 @@
 
 #import "AppDelegate.h"
 #import "PrefsWindowController.h"
+#import "ProcessUtils.h"
+#import "ActivationUnpauser.h"
 
 
 @interface AppDelegate()
@@ -15,6 +17,7 @@
 @property (strong, nonatomic) NSStatusItem* statusItem;
 @property (strong, nonatomic) NSWindowController* windowController;
 @property (strong, nonatomic) AppPrefs* prefs;
+@property (strong, nonatomic) ActivationUnpauser* activationUnpauser;
 @end
 
 static NSMenuItem* makeMenuItem(NSString* title, SEL sel, id target) {
@@ -25,37 +28,6 @@ static NSMenuItem* makeMenuItem(NSString* title, SEL sel, id target) {
 }
 
 
-static void startAndUnpauseProcess(NSString* bundleId) {
-    NSWorkspace* ws = [NSWorkspace sharedWorkspace];
-    
-    [ws launchAppWithBundleIdentifier:bundleId
-                              options:NSWorkspaceLaunchDefault| NSWorkspaceLaunchWithoutActivation
-       additionalEventParamDescriptor:nil
-                     launchIdentifier:nil];
-    
-    
-    NSArray* runningApps = [NSRunningApplication runningApplicationsWithBundleIdentifier:bundleId];
-    for (NSRunningApplication* app in runningApps) {
-        
-        NSString* cmd = [NSString stringWithFormat:@"/bin/kill -CONT %d", app.processIdentifier];
-        system(cmd.UTF8String);
-    }
-}
-
-static void terminateProcess(NSString *bundleId) {
-    NSArray* runningApps = [NSRunningApplication runningApplicationsWithBundleIdentifier:bundleId];
-    for (NSRunningApplication* app in runningApps)
-        [app terminate];
-}
-
-static void pauseProcess(NSString *bundleId) {
-    NSArray* runningApps = [NSRunningApplication runningApplicationsWithBundleIdentifier:bundleId];
-    for (NSRunningApplication* app in runningApps) {
-        
-        NSString* cmd = [NSString stringWithFormat:@"/bin/kill -STOP %d", app.processIdentifier];
-        system(cmd.UTF8String);
-    }
-}
 
 
 
@@ -131,14 +103,17 @@ static void pauseProcess(NSString *bundleId) {
         
     for (AppPref* app in appPrefs) {
         
-        if (ps == POWER_STATUS_CONNECTED && app.mode != APP_MODE_NO_ACTION)
-            startAndUnpauseProcess(app.bundleId);
-        
+        if (ps == POWER_STATUS_CONNECTED && app.mode != APP_MODE_NO_ACTION) {
+            startProcess(app.bundleId);
+            unpauseProcess(app.bundleId);
+        }
         
         if (ps == POWER_STATUS_DISCONNECTED) {
             
-            if (app.mode != APP_MODE_NO_ACTION && app.tempPaused)
-                startAndUnpauseProcess(app.bundleId);
+            if (app.mode != APP_MODE_NO_ACTION && app.tempPaused) {
+                startProcess(app.bundleId);
+                unpauseProcess(app.bundleId);
+            }
            
             if (app.mode == APP_MODE_TERMINATE && !app.tempPaused)
                 terminateProcess(app.bundleId);
@@ -146,6 +121,12 @@ static void pauseProcess(NSString *bundleId) {
             if (app.mode == APP_MODE_PAUSE && !app.tempPaused)
                 pauseProcess(app.bundleId);
         }
+    }
+    
+    if (ps == POWER_STATUS_DISCONNECTED) {
+        self.activationUnpauser = [ActivationUnpauser new];
+    } else {
+        self.activationUnpauser = nil;
     }
 }
 
